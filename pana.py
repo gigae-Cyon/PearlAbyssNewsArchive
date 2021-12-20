@@ -116,7 +116,7 @@ for idx, data in enumerate(file_data):
   lines[idx].append(hour)
 
 # lines를 기사 입력시간 순으로 정렬
-lines.sort(key=lambda x: (x[1], x[2], x[3], x[4]))
+lines.sort(key=lambda x: (-x[1], -x[2], -x[3], -x[4]))
 
 # 정렬한 순서대로 내용을 덮어씀
 with open('pana.html', 'w', encoding='utf8') as f:
