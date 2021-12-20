@@ -65,8 +65,8 @@ with open('pana.html', 'a', encoding='utf-8') as f:
       news_link = news.find('a', attrs={'class':'news_tit'})
       time_info = news.find('span', text=re.compile(' 전$')) # class가 info인 span을 이용하면 신문의 몇면 몇단의 기사인지를 알려주는 내용도 있음
       if duplication_check(news_link.get_text()[:14], saved_news_list): # 제목이 길기 때문에 앞의 14글자만 비교
-        f.write('<a href="' + news_link['href'] + '" target="blank"><h3>' + news_link['title'] + ',  ' +
-        get_released_time(current_time, time_info.get_text()) + '</h3></a>')
+        f.write('<h3><a href="' + news_link['href'] + '" target="blank">' + news_link['title'] + ',  ' +
+        get_released_time(current_time, time_info.get_text()) + '</a></h3>')
         f.write('<br/>')
         f.write('\n')
     except:
