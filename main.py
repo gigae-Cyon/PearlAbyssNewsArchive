@@ -59,16 +59,21 @@ finally:
   print('list loaded successfully')
 
 # 파일로 작성
-with open('pang_news.txt', 'a', encoding='utf8') as f:
+with open('pana.html', 'a', encoding='utf-8') as f:
   for news in list_news:
-    news_link = news.find('a', attrs={'class':'news_tit'})
-    time_info = news.find('span', text=re.compile(' 전$'))
-    if duplication_check(news_link.get_text()[:14], saved_news_list): # 제목이 길기 때문에 앞의 14글자만 비교
-      f.write(news_link['title'] + ', ' + get_released_time(current_time, time_info.get_text()) + '\n')
-      f.write(news_link['href'])
-      f.write('\n')
+    try:
+      news_link = news.find('a', attrs={'class':'news_tit'})
+      time_info = news.find('span', text=re.compile(' 전$')) # class가 info인 span을 이용하면 신문의 몇면 몇단의 기사인지를 알려주는 내용도 있음
+      if duplication_check(news_link.get_text()[:14], saved_news_list): # 제목이 길기 때문에 앞의 14글자만 비교
+        f.write('<a href="' + news_link['href'] + '" target="blank"><h3>' + news_link['title'] + ',  ' +
+        get_released_time(current_time, time_info.get_text()) + '</h3></a>')
+        f.write('<br/>')
+        f.write('\n')
+    except:
+      pass # 일정기간 지난 뉴스는 time_info에 '~전'이 아니라 '2021.12.14'처럼 날짜의 형태로 나올 수 있음
       
 # saved_news_list.pickle 파일 갱신
 with open('saved_news_list.pickle', 'wb') as f:
   pickle.dump(saved_news_list, f)
   print('dump successed')
+
