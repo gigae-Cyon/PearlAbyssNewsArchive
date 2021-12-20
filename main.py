@@ -14,8 +14,8 @@ def duplication_check(new_news, saved_news_list):
 # 기사 날짜, 시간 표현
 def get_released_time(current_time, time_info):
   return_string = ''
-  r = re.compile('^[\d]*')
-  m = r.search(time_info)
+  p = re.compile('^[\d]*')
+  m = p.search(time_info)
   number = int(time_info[:m.end()])
   korean = time_info[m.end()]
   
@@ -24,17 +24,27 @@ def get_released_time(current_time, time_info):
   # 기사의 발행 시각(released time)구하기
   if korean == '분': # n분 전
     released_time = current_time - datetime.timedelta(minutes=number)
-    return_string = released_time.strftime('%Y-%m-%d %H시%M분')
+    return_string = released_time.strftime('%Y-%m-%d %H시')
   elif korean == '시': # n시간 전
     released_time = current_time - datetime.timedelta(hours=number)
     return_string = released_time.strftime('%Y-%m-%d %H시')
   elif korean == '일': # n일 전
     released_time = current_time - datetime.timedelta(days=number)
-    return_string = released_time.strftime('%Y-%m-%d')
+    return_string = released_time.strftime('%Y-%m-%d 00시') # 기사의 시간순 정렬을 위해 00시로 설정
   else: # 몇 초전 기사일 수도 있음
     released_time = current_time
   
   return return_string
+
+# 기사의 시간순 정렬을 위한 연,월,일,시간 정보
+def get_time_members(line):
+  p = re.compile('\d{4}-\d{2}-\d{2} \d{2}')
+  m = p.search(line)
+  yea = m.group()[:4]
+  mon = m.group()[5:7]
+  day = m.group()[8:10]
+  hou = m.group()[11:13]
+  return int(yea), int(mon), int(day), int(hou)
 
 # 검색 페이지 request  
 url = 'https://search.naver.com/search.naver?where=news&query=%ED%8E%84%EC%96%B4%EB%B9%84%EC%8A%A4&sm=tab_tmr&nso=so:r,p:all,a:all&sort=0'
@@ -77,3 +87,25 @@ with open('saved_news_list.pickle', 'wb') as f:
   pickle.dump(saved_news_list, f)
   print('dump successed')
 
+# lines list에 각 기사의 내용과 입력시간을 2차원 list로 저장
+with open('pana.html', 'r', encoding='utf8') as f:
+  file_data = f.readlines()
+  
+lines = list()
+for data in file_data:
+  lines.append([data])
+
+for idx, data in enumerate(file_data):
+  year, month, day, hour = get_time_members(data)
+  lines[idx].append(year)
+  lines[idx].append(month)
+  lines[idx].append(day)
+  lines[idx].append(hour)
+
+# lines를 기사 입력시간 순으로 정렬
+lines.sort(key=lambda x: (x[1], x[2], x[3], x[4]))
+
+# 정렬한 순서대로 내용을 덮어씀
+with open('pana.html', 'w', encoding='utf8') as f:
+  for line in lines:
+    f.write(line[0])
